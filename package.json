@@ -1,0 +1,23 @@
+{
+  "name": "textile-gsm",
+  "version": "1.0.0",
+  "description": "RADIUS Textile Studio — GSM Calculator & Woven Fabric Design Tool",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.6",
+    "express": "^5.2.1",
+    "multer": "^2.4.0",
+    "openai": "^7.30.0"
+  }
+}

@@ -1,0 +1,30 @@
+# Environment variables — NEVER commit this
+.env
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+
+# Build output (if any)
+dist/
+build/
