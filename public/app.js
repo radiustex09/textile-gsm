@@ -450,28 +450,25 @@ document.addEventListener('DOMContentLoaded', () => {
         notice.innerText = 'Generating designs... please wait.';
         notice.classList.add('success'); // just for color during loading
         
-        const formData = new FormData();
-        if (selectedImageFile) {
-            formData.append('referenceImage', selectedImageFile);
-        }
-        formData.append('garmentType', document.getElementById('ds-type').value);
-        formData.append('variations', document.getElementById('ds-variations').value);
-        formData.append('colors', document.getElementById('ds-colors').value);
-        formData.append('details', document.getElementById('ds-details').value);
+        const garmentType = document.getElementById('ds-type').value;
+        const variations = parseInt(document.getElementById('ds-variations').value) || 1;
+        const colors = document.getElementById('ds-colors').value;
+        const details = document.getElementById('ds-details').value;
 
         try {
-            const res = await fetch('/api/generate-designs', {
-                method: 'POST',
-                body: formData
-            });
+            const prompt = `A professional clothing design concept for a ${garmentType}. Primary colors to use: ${colors}. CRITICAL: FLAT LAY PHOTOGRAPHY ONLY. NO HUMANS, NO PEOPLE, NO MANNEQUINS, NO FACES, NO BODY PARTS. The image must ONLY show the ${garmentType} laying flat by itself on a clean, empty, neutral background. Design details to include/change: ${details}.`;
 
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.message || 'API Error');
+            const numVariations = Math.min(variations, 20);
+            const images = [];
+            for (let i = 0; i < numVariations; i++) {
+                const seed = Math.floor(Math.random() * 1000000000);
+                const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}&width=1024&height=1024&nologo=true`;
+                images.push({ url: imageUrl });
             }
 
-            notice.innerText = 'API response received. ' + data.message;
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            notice.innerText = `Designs generated successfully (${images.length} returned)`;
             notice.className = 'api-notice success';
 
             // If images were actually returned, we would render them:

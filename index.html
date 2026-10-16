@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RADIUS | Textile GSM Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <a href="#" class="logo" aria-label="RADIUS Home"><model-viewer class="logo-model" src="radius-3d-braided-thread.glb" alt="" aria-hidden="true" auto-rotate auto-rotate-delay="0" rotation-per-second="18deg" interaction-prompt="none" loading="eager"></model-viewer><img src="radius-logo.jpg" alt="RADIUS Textile Studio logo"></a>
+            <nav class="nav">
+                <a href="#woven-calculator" class="nav-link active">Woven Calculator</a>
+                <a href="#calculator" class="nav-link">GSM Calculator</a>
+                <a href="#studio" class="nav-link">Design Studio</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Woven Fabric GSM Calculator Section (UNIDO & ASTM D3776 Standards) -->
+        <section id="woven-calculator" class="section section-woven">
+            <div class="container">
+                <div class="section-header-row">
+                    <div>
+                        <span class="section-badge">Standards-Compliant Specification</span>
+                        <h1 class="section-title">Woven Fabric GSM Calculator</h1>
+                        <p class="section-subtitle">Unit-correct woven fabric weight estimation (UNIDO) and physical swatch verification (ASTM D3776).</p>
+                    </div>
+                    <div class="preset-action-bar">
+                        <button type="button" id="btn-load-woven-preset" class="btn btn-outline">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Load Preset (60 EPI × 40 PPI, 23 × 22 Ne)
+                        </button>
+                        <button type="button" id="btn-reset-woven" class="btn btn-ghost btn-sm">Clear Form</button>
+                    </div>
+                </div>
+
+                <div class="woven-layout-grid">
+                    <!-- Left Column: Inputs Form -->
+                    <div class="woven-input-column">
+                        <form id="advanced-woven-form" novalidate>
+                            <!-- Error Alert Box -->
+                            <div id="woven-error-alert" class="alert-box alert-error hidden" role="alert"></div>
+
+                            <!-- 1. Yarn Typology & Yarn Count (Ne) -->
+                            <div class="card sub-card mb-1-5">
+                                <div class="card-subtitle-bar">
+                                    <span class="sub-card-icon">🧶</span>
+                                    <div>
+                                        <h3>1. Yarn Typology & Count</h3>
+                                        <p class="help-text">English Cotton Yarn Count (Ne) and optional conversion systems.</p>
+                                    </div>
+                                </div>
+
+                                <div class="form-grid mt-1">
+                                    <!-- Warp Yarn Count (Ne) -->
+                                    <div class="input-group">
+                                        <label for="adv-warp-count">Warp Yarn Count (Ne) <span class="req">*</span></label>
+                                        <div class="input-with-select">
+                                            <input type="number" id="adv-warp-count" min="0.001" step="any" required placeholder="e.g. 23">
+                                            <select id="adv-warp-system" aria-label="Warp Yarn System">
+                                                <option value="Ne" selected>Ne (Cotton)</option>
+                                                <option value="Tex">Tex</option>
+                                                <option value="Denier">Denier</option>
+                                                <option value="Nm">Nm (Metric)</option>
+                                            </select>
+                                        </div>
+                                        <span class="converted-hint" id="adv-warp-tex-hint">Equivalent: — Ne</span>
+                                    </div>
+
+                                    <!-- Weft Yarn Count (Ne) -->
+                                    <div class="input-group">
+                                        <label for="adv-weft-count">Weft Yarn Count (Ne) <span class="req">*</span></label>
+                                        <div class="input-with-select">
+                                            <input type="number" id="adv-weft-count" min="0.001" step="any" required placeholder="e.g. 22">
+                                            <select id="adv-weft-system" aria-label="Weft Yarn System">
+                                                <option value="Ne" selected>Ne (Cotton)</option>
+                                                <option value="Tex">Tex</option>
+                                                <option value="Denier">Denier</option>
+                                                <option value="Nm">Nm (Metric)</option>
+                                            </select>
+                                        </div>
+                                        <span class="converted-hint" id="adv-weft-tex-hint">Equivalent: — Ne</span>
+                                    </div>
+                                </div>
+
+                                <!-- Optional Yarn Sample Mode -->
+                                <div class="collapsible-mode mt-1">
+                                    <button type="button" class="collapsible-toggle" id="toggle-yarn-sample-mode" aria-expanded="false">
+                                        <span>⚖️ Optional Yarn Sample Mode (Measure Tex / Ne from Sample)</span>
+                                        <span class="toggle-icon" id="yarn-toggle-icon">+</span>
+                                    </button>
+                                    <div class="collapsible-content hidden" id="yarn-sample-mode-panel">
+                                        <p class="help-text mb-1">Directly measure Tex from weighed length: <code>Tex = weight (g) × 1000 ÷ length (m)</code> (<code>Ne = 590.5 ÷ Tex</code>)</p>
+                                        <div class="form-grid">
+                                            <div class="input-group">
+                                                <label for="yarn-sample-weight">Yarn Sample Weight (grams)</label>
+                                                <input type="number" id="yarn-sample-weight" min="0.0001" step="any" placeholder="e.g. 0.2567">
+                                            </div>
+                                            <div class="input-group">
+                                                <label for="yarn-sample-length">Yarn Sample Length (meters)</label>
+                                                <input type="number" id="yarn-sample-length" min="0.001" step="any" placeholder="e.g. 10">
+                                            </div>
+                                        </div>
+                                        <div class="yarn-calc-result-row mt-1">
+                                            <span>Calculated Sample: <strong id="yarn-sample-tex-val">—</strong> Tex (<strong id="yarn-sample-ne-val">—</strong> Ne)</span>
+                                            <div class="yarn-apply-btns">
+                                                <button type="button" class="btn btn-sm btn-outline" id="apply-sample-to-warp">Apply to Warp</button>
+                                                <button type="button" class="btn btn-sm btn-outline" id="apply-sample-to-weft">Apply to Weft</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2. Fabric Construction Parameters (EPI & PPI) -->
+                            <div class="card sub-card mb-1-5">
+                                <div class="card-subtitle-bar">
+                                    <span class="sub-card-icon">📐</span>
+                                    <div>
+                                        <h3>2. Fabric Construction Parameters</h3>
+                                        <p class="help-text">Thread densities (EPI & PPI) and optional crimp percentages.</p>
+                                    </div>
+                                </div>
+
+                                <div class="form-grid mt-1">
+                                    <div class="input-group">
+                                        <label for="adv-epi">Warp Density (EPI) <span class="req">*</span></label>
+                                        <input type="number" id="adv-epi" min="0.1" step="any" required placeholder="e.g. 60">
+                                        <span class="help-text">Ends Per Inch (Warp Density: 60 EPI)</span>
+                                    </div>
+                                    <div class="input-group">
+                                        <label for="adv-ppi">Weft Density (PPI) <span class="req">*</span></label>
+                                        <input type="number" id="adv-ppi" min="0.1" step="any" required placeholder="e.g. 40">
+                                        <span class="help-text">Picks Per Inch (Weft Density: 40 PPI)</span>
+                                    </div>
+                                    <div class="input-group">
+                                        <label for="adv-warp-crimp">Warp Crimp (%) <span class="opt">(Optional)</span></label>
+                                        <input type="number" id="adv-warp-crimp" min="0" step="0.1" value="0" placeholder="0">
+                                        <span class="help-text">Yarn take-up / interlacing waviness (defaults to 0%)</span>
+                                    </div>
+                                    <div class="input-group">
+                                        <label for="adv-weft-crimp">Weft Crimp (%) <span class="opt">(Optional)</span></label>
+                                        <input type="number" id="adv-weft-crimp" min="0" step="0.1" value="0" placeholder="0">
+                                        <span class="help-text">Yarn take-up / interlacing waviness (defaults to 0%)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. Optional Fabric Swatch Mode (Physical Measurement - ASTM D3776) -->
+                            <div class="card sub-card mb-1-5">
+                                <div class="card-subtitle-bar">
+                                    <span class="sub-card-icon">🔬</span>
+                                    <div>
+                                        <h3>3. Optional Fabric Swatch Mode (ASTM D3776)</h3>
+                                        <p class="help-text">Enter weighed sample dimensions to validate theoretical estimate against measured GSM.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Quick Swatch Preset Buttons -->
+                                <div class="swatch-presets-bar mt-1">
+                                    <span class="swatch-label">Quick Dimensions:</span>
+                                    <button type="button" class="swatch-preset-chip" id="swatch-preset-1x1in">1 × 1 inch Swatch</button>
+                                    <button type="button" class="swatch-preset-chip" id="swatch-preset-10x10cm">10 × 10 cm (100 cm²)</button>
+                                    <button type="button" class="swatch-preset-chip" id="swatch-preset-100x100cm">100 × 100 cm (1 m²)</button>
+                                </div>
+
+                                <div class="form-grid mt-1">
+                                    <div class="input-group">
+                                        <label for="swatch-weight">Swatch Weight (grams)</label>
+                                        <input type="number" id="swatch-weight" min="0.0001" step="any" placeholder="e.g. 1.038">
+                                    </div>
+                                    <div class="input-group">
+                                        <label for="swatch-width">Swatch Width</label>
+                                        <div class="input-with-select">
+                                            <input type="number" id="swatch-width" min="0.01" step="any" placeholder="e.g. 10">
+                                            <select id="swatch-width-unit">
+                                                <option value="cm" selected>cm</option>
+                                                <option value="inch">inch</option>
+                                                <option value="mm">mm</option>
+                                                <option value="m">m</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="input-group">
+                                        <label for="swatch-length">Swatch Length</label>
+                                        <div class="input-with-select">
+                                            <input type="number" id="swatch-length" min="0.01" step="any" placeholder="e.g. 10">
+                                            <select id="swatch-length-unit">
+                                                <option value="cm" selected>cm</option>
+                                                <option value="inch">inch</option>
+                                                <option value="mm">mm</option>
+                                                <option value="m">m</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="input-group">
+                                        <label>Standard Formula (ASTM D3776)</label>
+                                        <div class="readonly-formula-badge">
+                                            <code>GSM = Weight (g) × 10,000 ÷ (W_cm × L_cm)</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 4. Target GSM & Tolerance Check -->
+                            <div class="card sub-card mb-1-5">
+                                <div class="card-subtitle-bar">
+                                    <span class="sub-card-icon">🎯</span>
+                                    <div>
+                                        <h3>4. Target GSM & Quality Tolerance Check</h3>
+                                        <p class="help-text">Set manufacturing target limits to verify whether fabric is in-range.</p>
+                                    </div>
+                                </div>
+
+                                <div class="form-grid mt-1">
+                                    <div class="input-group">
+                                        <label for="adv-target-gsm">Target GSM (Optional)</label>
+                                        <input type="number" id="adv-target-gsm" min="1" step="0.1" placeholder="e.g. 100">
+                                    </div>
+                                    <div class="input-group">
+                                        <label for="adv-target-tolerance">Tolerance (± %)</label>
+                                        <input type="number" id="adv-target-tolerance" min="0.1" max="50" step="0.1" value="5" placeholder="5">
+                                    </div>
+                                </div>
+                                <p class="help-text mt-1 disclaimer-note">
+                                    ⚠️ <strong>Standard Testing Precaution:</strong> Target compliance checks mass per unit area against specifications. Fabric GSM alone does not determine overall fabric quality, tensile strength, or abrasion resistance.
+                                </p>
+                            </div>
+
+                            <div class="form-actions mt-1">
+                                <button type="submit" class="btn btn-primary btn-lg" id="btn-calc-woven-submit">
+                                    Calculate Woven Fabric GSM
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Right Column: Results & Analysis Card -->
+                    <div class="woven-results-column">
+                        <div class="card results-master-card" id="woven-results-card">
+                            <div class="results-header">
+                                <h3>Fabric Weight Breakdown</h3>
+                                <span class="est-badge" id="adv-res-badge-type">Theoretical Estimate</span>
+                            </div>
+
+                            <!-- Main GSM Display (Calculated Separately) -->
+                            <div class="main-gsm-banner">
+                                <span class="banner-label">Fabric GSM (Weight per Unit Area)</span>
+                                <div class="big-gsm-number">
+                                    <span id="adv-est-gsm-val">—</span>
+                                    <span class="unit">g/m² (GSM)</span>
+                                </div>
+                                <p class="banner-sub" id="adv-est-rounded-hint">GSM = Total fabric weight (g) ÷ sample area (1 m²)</p>
+                            </div>
+
+                            <!-- Total Fabric Weight Banner: Total fabric weight (g) = X + Y -->
+                            <div class="total-weight-banner mt-1">
+                                <div>
+                                    <span class="total-weight-label">Total fabric weight (g) = X + Y</span>
+                                    <p class="total-weight-sub" id="adv-total-weight-sub">Physical weight of 1 m² sample in grams (X + Y)</p>
+                                </div>
+                                <div class="total-weight-number">
+                                    <strong id="adv-total-weight-g-val">—</strong>
+                                    <span class="unit">g</span>
+                                </div>
+                            </div>
+
+                            <!-- Contribution Breakdown: X and Y shown separately in grams (NOT labeled as GSM) -->
+                            <div class="breakdown-grid mt-1-5">
+                                <div class="breakdown-cell warp-cell">
+                                    <div class="cell-head">
+                                        <span class="cell-title">X = Warp weight (g)</span>
+                                        <span class="cell-pct" id="adv-warp-pct">—%</span>
+                                    </div>
+                                    <div class="cell-val">
+                                        <strong id="adv-warp-g-val">—</strong> <span class="unit">g</span>
+                                    </div>
+                                    <span class="cell-sub" id="adv-warp-detail-hint">X = (EPI × 39.54² × 453.6) ÷ (840 × 36 × Ne) g</span>
+                                </div>
+
+                                <div class="breakdown-cell weft-cell">
+                                    <div class="cell-head">
+                                        <span class="cell-title">Y = Weft weight (g)</span>
+                                        <span class="cell-pct" id="adv-weft-pct">—%</span>
+                                    </div>
+                                    <div class="cell-val">
+                                        <strong id="adv-weft-g-val">—</strong> <span class="unit">g</span>
+                                    </div>
+                                    <span class="cell-sub" id="adv-weft-detail-hint">Y = (PPI × 39.54² × 453.6) ÷ (840 × 36 × Ne) g</span>
+                                </div>
+                            </div>
+
+                            <!-- Measured Swatch Result Comparison -->
+                            <div class="swatch-comparison-box mt-1-5" id="swatch-comparison-box">
+                                <div class="comp-head">
+                                    <span class="comp-icon">🔬</span>
+                                    <h4>Measured Swatch Validation (ASTM D3776)</h4>
+                                </div>
+                                <div class="comp-values-row">
+                                    <div>
+                                        <span class="comp-label">Physical Measured GSM:</span>
+                                        <span class="comp-val" id="adv-measured-gsm-val">Not entered</span>
+                                    </div>
+                                    <div>
+                                        <span class="comp-label">Variance (Est vs Meas):</span>
+                                        <span class="comp-val" id="adv-diff-pct-val">—</span>
+                                    </div>
+                                </div>
+                                <p class="comp-explanation" id="adv-variance-explanation">
+                                    Enter swatch details on the left to compare physical sample weight against theoretical estimate.
+                                </p>
+                            </div>
+
+                            <!-- Tolerance Status Box -->
+                            <div class="tolerance-box mt-1-5 hidden" id="adv-tolerance-status-box">
+                                <div class="tolerance-badge-row">
+                                    <span class="tol-badge" id="adv-tolerance-badge">Evaluating...</span>
+                                    <span class="tol-range" id="adv-tolerance-range-text">Target: — | Allowed Range: —</span>
+                                </div>
+                            </div>
+
+
+                            <div class="results-actions mt-1-5">
+                                <button type="button" class="btn btn-outline btn-sm full-width" id="btn-print-woven-report">
+                                    🖨️ Print Woven Specification Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Fabric GSM Calculator Section -->
+        <section id="calculator" class="section">
+            <div class="container">
+                <h2 class="section-title">Fabric GSM Calculator</h2>
+                <p class="section-subtitle">Precise calculations for measured and estimated fabric weights.</p>
+
+                <!-- Navigation bar with quick jump links for all 4 calculators -->
+                <div class="tabs-nav-bar">
+                    <div class="tabs" id="calc-nav-tabs">
+                        <button type="button" class="tab-btn active" data-target="measured-card">Measured GSM</button>
+                        <button type="button" class="tab-btn" data-target="woven-card">Estimated Woven</button>
+                        <button type="button" class="tab-btn" data-target="knitted-card">Knitted</button>
+                        <button type="button" class="tab-btn" data-target="nonwoven-card">Nonwoven / Layered</button>
+                        <button type="button" class="tab-btn tab-btn-highlight" data-target="grand-gsm-card">⚡ GSM Results</button>
+                    </div>
+                    <div class="layout-toggle-group">
+                        <button type="button" class="layout-btn active" id="btn-grid-layout" title="2-Column Grid Layout">
+                            <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+                            2 Columns
+                        </button>
+                        <button type="button" class="layout-btn" id="btn-stacked-layout" title="Stacked 1-Column Layout">
+                            <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="14" height="4" rx="1"/><rect x="1" y="10" width="14" height="4" rx="1"/></svg>
+                            Stacked
+                        </button>
+                    </div>
+                </div>
+
+                <!-- All 4 Calculators visible together on single page -->
+                <div class="calculators-container" id="calculators-wrapper">
+                    <!-- 1. Measured GSM Card -->
+                    <div class="calculator-card card" id="measured-card">
+                        <div class="card-header-bar">
+                            <div class="badge-title">
+                                <span class="calc-icon">📏</span>
+                                <h3>Measured GSM</h3>
+                            </div>
+                            <span class="calc-tag">Direct Sample</span>
+                        </div>
+                        <p class="calc-subtext">Direct weighing method — calculate GSM from physical fabric dimensions & weight.</p>
+                        
+                        <form id="measured-form" class="form-grid">
+                            <div class="input-group">
+                                <label for="m-weight">Sample Weight (grams)</label>
+                                <input type="number" id="m-weight" min="0.01" step="0.01" required placeholder="e.g. 5">
+                            </div>
+                            <div class="input-group">
+                                <label for="m-length">Sample Length</label>
+                                <div class="input-with-select">
+                                    <input type="number" id="m-length" min="0.01" step="0.01" required placeholder="e.g. 10">
+                                    <select id="m-length-unit">
+                                        <option value="cm">cm</option>
+                                        <option value="inch">inch</option>
+                                        <option value="m">m</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="m-width">Sample Width</label>
+                                <div class="input-with-select">
+                                    <input type="number" id="m-width" min="0.01" step="0.01" required placeholder="e.g. 10">
+                                    <select id="m-width-unit">
+                                        <option value="cm">cm</option>
+                                        <option value="inch">inch</option>
+                                        <option value="m">m</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="input-group full-width">
+                                <button type="submit" class="btn btn-primary">Calculate GSM</button>
+                            </div>
+                        </form>
+                        <div id="measured-result" class="result-box hidden">
+                            <h3>Result</h3>
+                            <p class="calc-formula">GSM = weight in grams ÷ area in square metres</p>
+                            <div class="result-value">
+                                <span class="number" id="m-result-val">-</span> <span class="unit">g/m²</span>
+                            </div>
+                            <button class="btn btn-secondary btn-sm print-report">Save / Print Report</button>
+                        </div>
+                    </div>
+
+                    <!-- 2. Estimated Woven Card -->
+                    <div class="calculator-card card" id="woven-card">
+                        <div class="card-header-bar">
+                            <div class="badge-title">
+                                <span class="calc-icon">🧵</span>
+                                <h3>Estimated Woven</h3>
+                            </div>
+                            <span class="calc-tag">Woven Spec</span>
+                        </div>
+                        <p class="notice">Estimate only. Enter the yarn counts, EPI/PPI, and crimp for the selected greige or finished state. The state selector is a label; it does not automatically apply shrinkage or finishing add-on.</p>
+                        
+                        <form id="woven-form" class="form-grid">
+                            <div class="input-group">
+                                <label for="w-fabric-state">Fabric State</label>
+                                <select id="w-fabric-state">
+                                    <option value="greige">Greige (Loom State)</option>
+                                    <option value="finished">Finished</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="w-count-system">Yarn Count System</label>
+                                <select id="w-count-system">
+                                    <option value="Ne">English Cotton (Ne)</option>
+                                    <option value="Nm">Metric (Nm)</option>
+                                    <option value="tex">Tex</option>
+                                    <option value="denier">Denier</option>
+                                    <option value="dtex">Decitex (dtex)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="section-divider">Warp Parameters</div>
+                            <div class="input-group">
+                                <label for="w-warp-count">Warp Yarn Count</label>
+                                <input type="number" id="w-warp-count" min="0.01" step="0.01" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="w-epi">Ends per Inch (EPI)</label>
+                                <input type="number" id="w-epi" min="0.1" step="0.1" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="w-warp-crimp">Warp Crimp (%)</label>
+                                <input type="number" id="w-warp-crimp" min="0" step="0.1" required>
+                            </div>
+
+                            <div class="section-divider">Weft Parameters</div>
+                            <div class="input-group">
+                                <label for="w-weft-count">Weft Yarn Count</label>
+                                <input type="number" id="w-weft-count" min="0.01" step="0.01" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="w-ppi">Picks per Inch (PPI)</label>
+                                <input type="number" id="w-ppi" min="0.1" step="0.1" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="w-weft-crimp">Weft Crimp (%)</label>
+                                <input type="number" id="w-weft-crimp" min="0" step="0.1" required>
+                            </div>
+
+                            <div class="input-group full-width">
+                                <button type="submit" class="btn btn-primary">Estimate GSM</button>
+                            </div>
+                        </form>
+                        <div id="woven-result" class="result-box hidden">
+                            <h3>Estimated Result</h3>
+                            <div class="breakdown">
+                                <div class="breakdown-item">
+                                    <span>Warp Contribution:</span>
+                                    <span id="w-warp-contrib">-</span>
+                                </div>
+                                <div class="breakdown-item">
+                                    <span>Weft Contribution:</span>
+                                    <span id="w-weft-contrib">-</span>
+                                </div>
+                            </div>
+                            <div class="result-value">
+                                <span class="number" id="w-result-val">-</span> <span class="unit">g/m² (EST)</span>
+                            </div>
+                            <button class="btn btn-secondary btn-sm print-report">Save / Print Report</button>
+                        </div>
+                    </div>
+
+                    <!-- 3. Knitted Card -->
+                    <div class="calculator-card card" id="knitted-card">
+                        <div class="card-header-bar">
+                            <div class="badge-title">
+                                <span class="calc-icon">🪡</span>
+                                <h3>Knitted</h3>
+                            </div>
+                            <span class="calc-tag">Knit Loop</span>
+                        </div>
+                        <p class="notice">Calculated results are estimates and may vary from actual weighed samples.</p>
+                        
+                        <form id="knitted-form" class="form-grid">
+                            <div class="input-group">
+                                <label for="k-count">Yarn Count</label>
+                                <div class="input-with-select">
+                                    <input type="number" id="k-count" min="0.01" step="0.01" required>
+                                    <select id="k-count-system" aria-label="Knitted yarn count system">
+                                        <option value="Ne">Ne</option>
+                                        <option value="Nm">Nm</option>
+                                        <option value="tex">Tex</option>
+                                        <option value="denier">Denier</option>
+                                        <option value="dtex">dtex</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="k-stitch">Stitch Length (mm)</label>
+                                <input type="number" id="k-stitch" min="0.01" step="0.01" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="k-wales">Wales per cm (WPC)</label>
+                                <input type="number" id="k-wales" min="0.1" step="0.1" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="k-courses">Courses per cm (CPC)</label>
+                                <input type="number" id="k-courses" min="0.1" step="0.1" required>
+                            </div>
+                            <div class="input-group full-width">
+                                <button type="submit" class="btn btn-primary">Estimate Knit GSM</button>
+                            </div>
+                        </form>
+                        <div id="knitted-result" class="result-box hidden">
+                            <h3>Estimated Result</h3>
+                            <div class="result-value">
+                                <span class="number" id="k-result-val">-</span> <span class="unit">g/m² (EST)</span>
+                            </div>
+                            <button class="btn btn-secondary btn-sm print-report">Save / Print Report</button>
+                        </div>
+                    </div>
+
+                    <!-- 4. Nonwoven / Layered Card -->
+                    <div class="calculator-card card" id="nonwoven-card">
+                        <div class="card-header-bar">
+                            <div class="badge-title">
+                                <span class="calc-icon">🧻</span>
+                                <h3>Nonwoven / Layered</h3>
+                            </div>
+                            <span class="calc-tag">Multi-Layer</span>
+                        </div>
+                        <p class="notice">Enter the GSM of each physical layer covering the same area. Include adhesive/coating as a layer when it adds weight. Only these actual layers are added together.</p>
+                        
+                        <form id="nonwoven-form" class="form-grid">
+                            <div id="layers-container" class="full-width">
+                                <div class="layer-item">
+                                    <h4>Layer 1</h4>
+                                    <div class="input-group">
+                                        <label>Estimated GSM</label>
+                                        <input type="number" class="layer-gsm" min="0.1" step="0.1" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-group full-width">
+                                <button type="button" id="add-layer-btn" class="btn btn-outline">Add Layer</button>
+                            </div>
+                            <div class="input-group full-width" style="margin-top: 1rem;">
+                                <button type="submit" class="btn btn-primary">Calculate Total GSM</button>
+                            </div>
+                        </form>
+                        <div id="nonwoven-result" class="result-box hidden">
+                            <h3>Total Estimated Result</h3>
+                            <div class="result-value">
+                                <span class="number" id="nw-result-val">-</span> <span class="unit">g/m² (EST)</span>
+                            </div>
+                            <button class="btn btn-secondary btn-sm print-report">Save / Print Report</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Combined Grand GSM & Multi-Method Analysis Hub -->
+                <div class="card grand-gsm-card mt-2" id="grand-gsm-card">
+                    <div class="grand-gsm-header">
+                        <div class="badge-title">
+                            <span class="calc-icon">⚡</span>
+                            <div>
+                                <h2>GSM Results Overview</h2>
+                                <p class="calc-subtext" style="margin-bottom:0;">Review results from each method separately.</p>
+                            </div>
+                        </div>
+                        <div class="grand-gsm-actions">
+                            <button type="button" id="btn-calc-all" class="btn btn-outline btn-sm">
+                                Calculate Completed Forms
+                            </button>
+                            <button type="button" id="btn-print-consolidated" class="btn btn-primary btn-sm">
+                                🖨️ Consolidated Report
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 4 Methods Status Grid -->
+                    <div class="grand-methods-grid">
+                        <div class="method-metric-box" id="metric-box-measured">
+                            <div class="metric-head">
+                                <span class="method-name">📏 Measured GSM</span>
+                                <span class="metric-status" id="status-m">Not calculated</span>
+                            </div>
+                            <div class="metric-value">
+                                <span class="num" id="summary-m-val">--</span> <span class="unit">g/m²</span>
+                            </div>
+                        </div>
+
+                        <div class="method-metric-box" id="metric-box-woven">
+                            <div class="metric-head">
+                                <span class="method-name">🧵 Estimated Woven</span>
+                                <span class="metric-status" id="status-w">Not calculated</span>
+                            </div>
+                            <div class="metric-value">
+                                <span class="num" id="summary-w-val">--</span> <span class="unit">g/m²</span>
+                            </div>
+                        </div>
+
+                        <div class="method-metric-box" id="metric-box-knitted">
+                            <div class="metric-head">
+                                <span class="method-name">🪡 Knitted</span>
+                                <span class="metric-status" id="status-k">Not calculated</span>
+                            </div>
+                            <div class="metric-value">
+                                <span class="num" id="summary-k-val">--</span> <span class="unit">g/m²</span>
+                            </div>
+                        </div>
+
+                        <div class="method-metric-box" id="metric-box-nonwoven">
+                            <div class="metric-head">
+                                <span class="method-name">🧻 Nonwoven / Layered</span>
+                                <span class="metric-status" id="status-nw">Not calculated</span>
+                            </div>
+                            <div class="metric-value">
+                                <span class="num" id="summary-nw-val">--</span> <span class="unit">g/m²</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="notice mt-1">These methods describe different ways to calculate or estimate GSM. Do not add or average their results. For an actual multilayer fabric, add only the GSM values of the physical layers in the layered calculator. A measured sample is the best check of the finished fabric.</p>
+                    <p class="help-text" id="calc-all-feedback" aria-live="polite">The button calculates only forms you have completed; it never fills in sample values.</p>
+                </div>
+
+                <!-- Optional Tests (Visual only for form) -->
+                <div class="card mt-2">
+                    <h3 style="margin-bottom: 1rem; font-size: 1.125rem;">Optional Test Results</h3>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label>Tensile Strength (N)</label>
+                            <input type="text" placeholder="e.g. 350 N">
+                        </div>
+                        <div class="input-group">
+                            <label>Shrinkage (%)</label>
+                            <input type="text" placeholder="e.g. -2%">
+                        </div>
+                        <div class="input-group">
+                            <label>Colorfastness (1-5)</label>
+                            <input type="text" placeholder="e.g. 4-5">
+                        </div>
+                    </div>
+                    <p class="help-text mt-1">Note: GSM alone does not determine fabric quality.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="studio" class="section section-dark">
+            <div class="container">
+                <h1 class="section-title">Clothing Design Studio</h1>
+                <p class="section-subtitle">Generate custom apparel designs using AI.</p>
+                
+                <div class="design-studio-grid">
+                    <div class="card">
+                        <form id="design-form">
+                            <div class="input-group">
+                                <label for="ds-image">Reference Image</label>
+                                <input type="file" id="ds-image" accept="image/*,.heic,.heif" class="file-input">
+                                <div id="ds-preview-container" class="hidden" style="margin-top: 1rem;">
+                                    <img id="ds-preview" src="" alt="Image Preview" style="max-width: 100%; max-height: 200px; border-radius: 4px;">
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="ds-type">Garment Type</label>
+                                <select id="ds-type">
+                                    <option value="tshirt">T-Shirt</option>
+                                    <option value="shirt">Button-up Shirt</option>
+                                    <option value="dress">Dress</option>
+                                    <option value="trousers">Trousers</option>
+                                    <option value="jacket">Jacket</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="ds-variations">Number of Variations</label>
+                                <input type="range" id="ds-variations" min="1" max="20" value="10" oninput="document.getElementById('var-val').innerText = this.value">
+                                <span id="var-val" style="display:block; text-align:right; font-size:0.875rem; color:var(--gray);">10</span>
+                            </div>
+                            <div class="input-group">
+                                <label for="ds-colors">Target Colors (Comma separated)</label>
+                                <input type="text" id="ds-colors" placeholder="e.g. Navy Blue, Olive Green">
+                            </div>
+                            <div class="input-group">
+                                <label for="ds-details">Details to Keep/Change</label>
+                                <textarea id="ds-details" rows="3" placeholder="e.g. Keep the collar style, make sleeves shorter..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary full-width">Generate Designs</button>
+                        </form>
+                    </div>
+                    
+                    <div class="studio-results">
+                        <div id="api-status" class="api-notice hidden">
+                            <!-- Populated via JS -->
+                        </div>
+                        <div id="designs-container" class="designs-grid">
+                            <!-- Generated images go here -->
+                            <div class="empty-state">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                    <polyline points="21 15 16 10 5 21"></polyline>
+                                </svg>
+                                <p>Upload a reference and submit to generate variations.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hidden Report Template -->
+        <div id="print-template" class="print-only">
+            <div class="report-header">
+                <img src="radius-logo.jpg" alt="RADIUS Textile Studio logo" class="report-logo">
+                <h2>RADIUS</h2>
+                <p>Fabric Analysis Report</p>
+            </div>
+            <div id="report-content"></div>
+        </div>
+
+    </main>
+
+    <footer id="contact" class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div id="about">
+                    <h3>RADIUS</h3>
+                    <p>Innovative textile solutions and precise fabric analysis.</p>
+                </div>
+                <div>
+                    <h3>Contact</h3>
+                    <p>[COMPANY CONTACT DETAILS]</p>
+                </div>
+                <div>
+                    <h3>Links</h3>
+                    <p><a href="#woven-calculator">Woven Calculator</a></p>
+                    <p><a href="#calculator">GSM Calculator</a></p>
+                    <p><a href="#studio">Design Studio</a></p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 RADIUS. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
