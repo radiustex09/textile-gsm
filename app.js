@@ -472,8 +472,8 @@ document.addEventListener('DOMContentLoaded', () => {
             notice.className = 'api-notice success';
 
             // If images were actually returned, we would render them:
-            if (data.images && data.images.length > 0) {
-                container.innerHTML = data.images.map(img => `
+            if (images && images.length > 0) {
+                container.innerHTML = images.map(img => `
                     <div class="design-item">
                         <img src="${img.url}" alt="Generated Design" onerror="this.onerror=null; setTimeout(() => this.src='${img.url}&retry=' + Math.random(), 2000);">
                         <div class="design-overlay">
